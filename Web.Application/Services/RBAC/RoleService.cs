@@ -25,6 +25,11 @@ namespace Web.Application.Services.RBAC
         /// </summary>
         public async Task<bool> AssignRoleAsync(AssignRoleInput input)
         {
+            if (input.UserId <= 0)
+                throw new Exception("用户ID不合法");
+            if (input.RoleId <= 0)
+                throw new Exception("角色ID不合法");
+
             var exists = await _userRoleRepo.GetValue(
                 ur => ur.UserId == input.UserId && ur.RoleId == input.RoleId);
             if (exists != null) throw new Exception("该角色已分配");
@@ -46,6 +51,11 @@ namespace Web.Application.Services.RBAC
         /// </summary>
         public async Task<bool> RevokeRoleAsync(AssignRoleInput input)
         {
+            if (input.UserId <= 0)
+                throw new Exception("用户ID不合法");
+            if (input.RoleId <= 0)
+                throw new Exception("角色ID不合法");
+
             var userRole = await _userRoleRepo.GetValue(
                 ur => ur.UserId == input.UserId && ur.RoleId == input.RoleId);
             if (userRole == null) throw new Exception("该角色未分配");
@@ -58,6 +68,9 @@ namespace Web.Application.Services.RBAC
         /// </summary>
         public async Task<List<RoleOutput>> GetUserRolesAsync(long userId)
         {
+            if (userId <= 0)
+                throw new Exception("用户ID不合法");
+
             var roleIds = _userRoleRepo.GetValues()
                 .Where(ur => ur.UserId == userId)
                 .Select(ur => ur.RoleId)

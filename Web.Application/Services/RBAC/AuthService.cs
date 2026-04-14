@@ -6,6 +6,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.RegularExpressions;
 using Web.Application.Contracts.DTO.Input.RBAC;
 using Web.Application.Contracts.DTO.Output.RBAC;
 using Web.Application.Contracts.IServices.RBAC;
@@ -43,6 +44,23 @@ namespace Web.Application.Services.RBAC
         /// </summary>
         public async Task<bool> RegisterAsync(RegisterInput input)
         {
+            if (string.IsNullOrWhiteSpace(input.Username))
+                throw new Exception("用户名不能为空");
+            if (input.Username.Length < 3 || input.Username.Length > 20)
+                throw new Exception("用户名长度为3-20位");
+            if (string.IsNullOrWhiteSpace(input.DisplayName))
+                throw new Exception("显示名称不能为空");
+            if (input.DisplayName.Length < 2 || input.DisplayName.Length > 20)
+                throw new Exception("显示名称长度为2-20位");
+            if (string.IsNullOrWhiteSpace(input.Email))
+                throw new Exception("邮箱不能为空");
+            if (!Regex.IsMatch(input.Email, @"^[^@\s]+@[^@\s]+\.[^@\s]+$"))
+                throw new Exception("邮箱格式不正确");
+            if (string.IsNullOrWhiteSpace(input.Password))
+                throw new Exception("密码不能为空");
+            if (input.Password.Length < 6 || input.Password.Length > 20)
+                throw new Exception("密码长度为6-20位");
+
             // 检查用户名是否已存在
             var exists = await _userRepo.GetValue(u => u.Username == input.Username);
             if (exists != null) throw new Exception("用户名已存在");
@@ -66,6 +84,13 @@ namespace Web.Application.Services.RBAC
         /// </summary>
         public async Task<LoginOutput> LoginAsync(LoginInput input)
         {
+            if (string.IsNullOrWhiteSpace(input.Username))
+                throw new Exception("用户名不能为空");
+            if (string.IsNullOrWhiteSpace(input.Password))
+                throw new Exception("密码不能为空");
+            if (input.Password.Length < 6)
+                throw new Exception("密码长度不能少于6位");
+
             var user = await _userRepo.GetValue(u => u.Username == input.Username);
             if (user == null) throw new Exception("用户名或密码错误");
             if (user.PasswordHash != input.Password.GetMD5())
@@ -114,6 +139,9 @@ namespace Web.Application.Services.RBAC
         /// </summary>
         public async Task<LoginOutput> RefreshTokenAsync(RefreshTokenInput input)
         {
+            if (string.IsNullOrWhiteSpace(input.RefreshToken))
+                throw new Exception("RefreshToken不能为空");
+
             // 从 Redis 里找这个 RefreshToken 属于哪个用户
             // 这里用 scan 前缀匹配，所以 key 规则是 refresh:{userId}
             // 前端需要同时传 userId，或者把 userId 编码进 RefreshToken

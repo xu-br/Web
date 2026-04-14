@@ -28,6 +28,11 @@ namespace Web.Application.Services.RBAC
         /// </summary>
         public async Task<bool> AssignPermissionAsync(AssignPermissionInput input)
         {
+            if (input.RoleId <= 0)
+                throw new Exception("角色ID不合法");
+            if (input.PermissionId <= 0)
+                throw new Exception("权限ID不合法");
+
             var exists = await _rolePermissionRepo.GetValue(
                 rp => rp.RoleId == input.RoleId && rp.PermissionId == input.PermissionId);
             if (exists != null) throw new Exception("该权限已绑定");
@@ -49,6 +54,11 @@ namespace Web.Application.Services.RBAC
         /// </summary>
         public async Task<bool> RevokePermissionAsync(AssignPermissionInput input)
         {
+            if (input.RoleId <= 0)
+                throw new Exception("角色ID不合法");
+            if (input.PermissionId <= 0)
+                throw new Exception("权限ID不合法");
+
             var rolePermission = await _rolePermissionRepo.GetValue(
                 rp => rp.RoleId == input.RoleId && rp.PermissionId == input.PermissionId);
             if (rolePermission == null) throw new Exception("该权限未绑定");
@@ -61,6 +71,9 @@ namespace Web.Application.Services.RBAC
         /// </summary>
         public async Task<List<PermissionOutput>> GetUserPermissionsAsync(long userId)
         {
+            if (userId <= 0)
+                throw new Exception("用户ID不合法");
+
             var roleIds = _userRoleRepo.GetValues()
                 .Where(ur => ur.UserId == userId)
                 .Select(ur => ur.RoleId)
