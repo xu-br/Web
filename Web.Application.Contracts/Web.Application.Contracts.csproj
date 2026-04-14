@@ -11,10 +11,4 @@
     <ProjectReference Include="..\Web.Infrastructure\Web.Infrastructure.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="DTO\Input\" />
-    <Folder Include="DTO\Output\" />
-    <Folder Include="IServices\" />
-  </ItemGroup>
-
 </Project>

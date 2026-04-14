@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Web.Infrastructure.Data;
 using Web.Infrastructure.Repositories;
+using Web.Infrastructure.Services;
 
 namespace Web.Infrastructure.AutofacModules
 {
@@ -16,10 +17,12 @@ namespace Web.Infrastructure.AutofacModules
     public class RepositoryModule : Autofac.Module
     {
         private readonly string _connectionString;
+        private readonly string _redisConnectionString;
 
-        public RepositoryModule(string connectionString)
+        public RepositoryModule(string connectionString, string redisConnectionString)
         {
             _connectionString = connectionString;
+            _redisConnectionString = redisConnectionString;
         }
 
         /// <summary>
@@ -32,11 +35,16 @@ namespace Web.Infrastructure.AutofacModules
             builder.Register(x =>
             {
                 var optionBuilder = new DbContextOptionsBuilder<MyDbContext>();
-                optionBuilder.UseMySql(_connectionString, new MySqlServerVersion(new Version(8, 0, 36)));
+                optionBuilder.UseMySql(_connectionString, new MySqlServerVersion(new Version(9,5,0)));
                 return new MyDbContext(optionBuilder.Options);
             })
             .As<MyDbContext>()
             .InstancePerLifetimeScope();
+
+            // Redis 注册
+            builder.RegisterInstance(new RedisService(_redisConnectionString))
+                   .AsSelf()
+                   .SingleInstance();
 
             //注册仓库
             builder.RegisterGeneric(typeof(BaseRepository<>))
