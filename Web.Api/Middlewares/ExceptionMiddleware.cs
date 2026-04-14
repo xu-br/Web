@@ -3,6 +3,9 @@ using Web.Application.Contracts.DTO.ErrorCode;
 
 namespace Web.Api.Middlewares
 {
+    /// <summary>
+    /// 全局异常处理中间件
+    /// </summary>
     public class ExceptionMiddleware
     {
         private readonly RequestDelegate _next;
@@ -17,6 +20,30 @@ namespace Web.Api.Middlewares
             try
             {
                 await _next(context);
+
+                // 拦截 403
+                if (context.Response.StatusCode == 403 && !context.Response.HasStarted)
+                {
+                    context.Response.ContentType = "application/json";
+                    var result = ApiResultHelper.Fail("无权限访问");
+                    var json = JsonSerializer.Serialize(result, new JsonSerializerOptions
+                    {
+                        PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+                    });
+                    await context.Response.WriteAsync(json);
+                }
+
+                // 拦截 401
+                if (context.Response.StatusCode == 401 && !context.Response.HasStarted)
+                {
+                    context.Response.ContentType = "application/json";
+                    var result = ApiResultHelper.Fail("请先登录");
+                    var json = JsonSerializer.Serialize(result, new JsonSerializerOptions
+                    {
+                        PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+                    });
+                    await context.Response.WriteAsync(json);
+                }
             }
             catch (Exception ex)
             {

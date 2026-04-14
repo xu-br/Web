@@ -24,17 +24,20 @@ namespace Web.Application.Services.RBAC
         private readonly IBaseRepository<RolePermission> _rolePermissionRepo;
         private readonly RedisService _redis;
         private readonly IConfiguration _config;
+        private readonly IBaseRepository<Permission> _permissionRepo;
 
         public AuthService(
             IBaseRepository<User> userRepo,
             IBaseRepository<UserRole> userRoleRepo,
             IBaseRepository<RolePermission> rolePermissionRepo,
+            IBaseRepository<Permission> permissionRepo,  // 新增
             RedisService redis,
             IConfiguration config)
         {
             _userRepo = userRepo;
             _userRoleRepo = userRoleRepo;
             _rolePermissionRepo = rolePermissionRepo;
+            _permissionRepo = permissionRepo;  // 新增
             _redis = redis;
             _config = config;
         }
@@ -102,10 +105,15 @@ namespace Web.Application.Services.RBAC
                 .Select(ur => ur.RoleId)
                 .ToList();
 
-            var permissions = _rolePermissionRepo.GetValues()
+            var permissionIds = _rolePermissionRepo.GetValues()
                 .Where(rp => roleIds.Contains(rp.RoleId))
-                .Select(rp => rp.PermissionId.ToString())
+                .Select(rp => rp.PermissionId)
                 .Distinct()
+                .ToList();
+
+            var permissions = _permissionRepo.GetValues()
+                .Where(p => permissionIds.Contains(p.Id))
+                .Select(p => p.Name)
                 .ToList();
 
             // 生成双 Token

@@ -1,7 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Web.Application.Contracts.DTO.Input.RBAC;
+using Web.Api.Filters;
 using Web.Application.Contracts.DTO.ErrorCode;
+using Web.Application.Contracts.DTO.Input.RBAC;
 using Web.Application.Contracts.IServices.RBAC;
 
 namespace Web.Api.Controllers.RBAC
@@ -19,9 +20,10 @@ namespace Web.Api.Controllers.RBAC
         }
 
         /// <summary>
-        /// 分配角色
+        /// 分配角色（需要 roles:write 权限）
         /// </summary>
-        [HttpPost("assign")]
+        [HttpPost]
+        [Permission("roles:write")]
         public async Task<IActionResult> Assign([FromBody] AssignRoleInput input)
         {
             var result = await _roleService.AssignRoleAsync(input);
@@ -29,9 +31,10 @@ namespace Web.Api.Controllers.RBAC
         }
 
         /// <summary>
-        /// 撤销角色
+        /// 撤销角色（需要 roles:write 权限）
         /// </summary>
-        [HttpPost("revoke")]
+        [HttpPost]
+        [Permission("roles:write")]
         public async Task<IActionResult> Revoke([FromBody] AssignRoleInput input)
         {
             var result = await _roleService.RevokeRoleAsync(input);
@@ -39,9 +42,10 @@ namespace Web.Api.Controllers.RBAC
         }
 
         /// <summary>
-        /// 查询用户角色列表
+        /// 查询用户角色列表（需要 roles:read 权限）
         /// </summary>
-        [HttpGet("user/{userId}")]
+        [HttpGet("{userId}")]
+        [Permission("roles:read")]
         public async Task<IActionResult> GetUserRoles(long userId)
         {
             var result = await _roleService.GetUserRolesAsync(userId);
