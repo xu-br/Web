@@ -36,7 +36,7 @@ namespace Web.Infrastructure.Data
                 .HasOne<Role>().WithMany().HasForeignKey(ur => ur.RoleId)
                 .OnDelete(DeleteBehavior.Cascade);
             mb.Entity<UserRole>()
-                .HasIndex(ur => new { ur.UserId, ur.RoleId }).IsUnique();
+                .HasIndex(ur => new { ur.UserId, ur.RoleId, ur.DeleteId }).IsUnique();
 
             // ── RolePermission 外键 & 唯一索引 ────────────────
             mb.Entity<RolePermission>()
@@ -46,13 +46,13 @@ namespace Web.Infrastructure.Data
                 .HasOne<Permission>().WithMany().HasForeignKey(rp => rp.PermissionId)
                 .OnDelete(DeleteBehavior.Cascade);
             mb.Entity<RolePermission>()
-                .HasIndex(rp => new { rp.RoleId, rp.PermissionId }).IsUnique();
+                .HasIndex(rp => new { rp.RoleId, rp.PermissionId, rp.DeleteId }).IsUnique();
 
             // ── 主表唯一索引 ──────────────────────────────────
-            mb.Entity<User>().HasIndex(u => u.Username).IsUnique();
-            mb.Entity<User>().HasIndex(u => u.Email).IsUnique();
-            mb.Entity<Role>().HasIndex(r => r.Name).IsUnique();
-            mb.Entity<Permission>().HasIndex(p => p.Name).IsUnique();
+            mb.Entity<User>().HasIndex(u => new { u.Username, u.DeleteId }).IsUnique();
+            mb.Entity<User>().HasIndex(u => new { u.Email, u.DeleteId }).IsUnique();
+            mb.Entity<Role>().HasIndex(r => new { r.Name, r.DeleteId }).IsUnique();
+            mb.Entity<Permission>().HasIndex(p => new { p.Name, p.DeleteId }).IsUnique();
         }
     }
 }

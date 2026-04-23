@@ -12,8 +12,8 @@ using Web.Infrastructure.Data;
 namespace Web.Infrastructure.Migrations
 {
     [DbContext(typeof(MyDbContext))]
-    [Migration("20260410082411_a")]
-    partial class a
+    [Migration("20260415012130_RBAC")]
+    partial class RBAC
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -37,8 +37,8 @@ namespace Web.Infrastructure.Migrations
                     b.Property<DateTime>("CreateTime")
                         .HasColumnType("datetime(6)");
 
-                    b.Property<int>("DeleteId")
-                        .HasColumnType("int");
+                    b.Property<long>("DeleteId")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Description")
                         .HasColumnType("longtext");
@@ -56,7 +56,7 @@ namespace Web.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Name")
+                    b.HasIndex("Name", "DeleteId")
                         .IsUnique();
 
                     b.ToTable("Permissions");
@@ -70,8 +70,8 @@ namespace Web.Infrastructure.Migrations
                     b.Property<DateTime>("CreateTime")
                         .HasColumnType("datetime(6)");
 
-                    b.Property<int>("DeleteId")
-                        .HasColumnType("int");
+                    b.Property<long>("DeleteId")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Description")
                         .HasColumnType("longtext");
@@ -85,7 +85,7 @@ namespace Web.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Name")
+                    b.HasIndex("Name", "DeleteId")
                         .IsUnique();
 
                     b.ToTable("Roles");
@@ -99,8 +99,8 @@ namespace Web.Infrastructure.Migrations
                     b.Property<DateTime>("CreateTime")
                         .HasColumnType("datetime(6)");
 
-                    b.Property<int>("DeleteId")
-                        .HasColumnType("int");
+                    b.Property<long>("DeleteId")
+                        .HasColumnType("bigint");
 
                     b.Property<long>("PermissionId")
                         .HasColumnType("bigint");
@@ -115,7 +115,7 @@ namespace Web.Infrastructure.Migrations
 
                     b.HasIndex("PermissionId");
 
-                    b.HasIndex("RoleId", "PermissionId")
+                    b.HasIndex("RoleId", "PermissionId", "DeleteId")
                         .IsUnique();
 
                     b.ToTable("RolePermissions");
@@ -129,8 +129,8 @@ namespace Web.Infrastructure.Migrations
                     b.Property<DateTime>("CreateTime")
                         .HasColumnType("datetime(6)");
 
-                    b.Property<int>("DeleteId")
-                        .HasColumnType("int");
+                    b.Property<long>("DeleteId")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("DisplayName")
                         .IsRequired()
@@ -153,10 +153,10 @@ namespace Web.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Email")
+                    b.HasIndex("Email", "DeleteId")
                         .IsUnique();
 
-                    b.HasIndex("Username")
+                    b.HasIndex("Username", "DeleteId")
                         .IsUnique();
 
                     b.ToTable("Users");
@@ -170,8 +170,8 @@ namespace Web.Infrastructure.Migrations
                     b.Property<DateTime>("CreateTime")
                         .HasColumnType("datetime(6)");
 
-                    b.Property<int>("DeleteId")
-                        .HasColumnType("int");
+                    b.Property<long>("DeleteId")
+                        .HasColumnType("bigint");
 
                     b.Property<long>("RoleId")
                         .HasColumnType("bigint");
@@ -186,7 +186,7 @@ namespace Web.Infrastructure.Migrations
 
                     b.HasIndex("RoleId");
 
-                    b.HasIndex("UserId", "RoleId")
+                    b.HasIndex("UserId", "RoleId", "DeleteId")
                         .IsUnique();
 
                     b.ToTable("UserRoles");

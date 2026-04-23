@@ -1,0 +1,28 @@
+{
+  "version": "2.0",
+  "project_path": "C:\\Users\\nnm43\\Desktop\\wrrr\\Web.Api",
+  "entries": [
+    {
+      "id": "b9bf1d12-2302-4e8d-9447-9291d38b2253",
+      "content": "用户工作偏好：\n1. 完成分析后生成总结性 Markdown 文档\n2. 需要生成测试脚本\n3. 需要编译项目\n4. 需要运行项目\n5. 优先使用 sou 工具进行代码语义搜索，根据结果查看更多上下文\n6. 使用 context7 查询框架/库的最新官方文档和 API 用法",
+      "content_normalized": "用户工作偏好 1 完成分析后生成总结性 markdown 文档 2 需要生成测试脚本 3 需要编译项目 4 需要运行项目 5 优先使用 sou 工具进行代码语义搜索根据结果查看更多上下文 6 使用 context7 查询框架/库的最新官方文档和 api 用法",
+      "category": "Rule",
+      "created_at": "2026-04-15T08:31:52.614968100Z",
+      "updated_at": "2026-04-15T08:31:52.614968100Z"
+    },
+    {
+      "id": "56607df6-d02b-49f7-b7b4-961af4622138",
+      "content": "项目问题清单（2026-04-23）：\n1. AutoMapper 13.0.1 存在高危漏洞（GHSA-rvv3-g6hj-g44x）\n2. 密码使用 MD5 加密（不安全）\n3. 权限过滤器返回 200 状态码而非 401/403\n4. 缺少权限初始化数据\n5. 22 个 nullable 引用类型编译警告\n6. 缺少日志记录\n7. 缺少单元测试\n8. appsettings.json 缺少 JWT 和 Redis 配置（生产环境）",
+      "content_normalized": "项目问题清单2026-04-23 1 automapper 1301 存在高危漏洞ghsa-rvv3-g6hj-g44x 2 密码使用 md5 加密不安全 3 权限过滤器返回 200 状态码而非 401/403 4 缺少权限初始化数据 5 22 个 nullable 引用类型编译警告 6 缺少日志记录 7 缺少单元测试 8 appsettingsjson 缺少 jwt 和 redis 配置生产环境",
+      "category": "Rule",
+      "created_at": "2026-04-23T07:23:21.014274900Z",
+      "updated_at": "2026-04-23T07:23:21.014274900Z"
+    }
+  ],
+  "last_dedup_at": "2026-04-15T08:17:07.743250900Z",
+  "config": {
+    "similarity_threshold": 0.7,
+    "dedup_on_startup": true,
+    "enable_dedup": true
+  }
+}

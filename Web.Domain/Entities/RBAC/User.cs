@@ -31,8 +31,8 @@ namespace Web.Domain.Entities.RBAC
         public string Email { get; set; } = string.Empty;
 
         /// <summary>
-        /// 经过 BCrypt 哈希处理后的密码摘要。
-        /// 原始密码不应以任何形式持久化，鉴权时使用 BCrypt.Verify() 比对。
+        /// 经过 MD5 处理后的密码摘要。
+        /// 原始密码不应以任何形式持久化，鉴权时使用相同的 MD5 规则进行比对。
         /// </summary>
         public string PasswordHash { get; set; } = string.Empty;
     }

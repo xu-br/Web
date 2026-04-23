@@ -35,14 +35,28 @@ namespace Web.Infrastructure.Repositories
         }
 
         /// <summary>
-        /// 删除
+        /// 软删除
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
         public async Task<int> Delete(params long[] id)
         {
-            var entities = _db.Set<T>().Where(p => id.Contains(p.Id));
-            _db.Set<T>().RemoveRange(entities);
+            var entities = await ActiveSet()
+                .Where(p => id.Contains(p.Id))
+                .ToListAsync();
+
+            if (entities.Count == 0)
+            {
+                return 0;
+            }
+
+            var now = DateTime.Now;
+            foreach (var entity in entities)
+            {
+                entity.DeleteId = entity.Id;
+                entity.UpdateTime = now;
+            }
+
             return await _db.SaveChangesAsync();
         }
 
@@ -53,7 +67,7 @@ namespace Web.Infrastructure.Repositories
         /// <returns></returns>
         public async Task<T?> GetModel(long id)
         {
-            return await _db.Set<T>().FirstOrDefaultAsync(p => p.Id == id);
+            return await ActiveSet().FirstOrDefaultAsync(p => p.Id == id);
         }
 
         /// <summary>
@@ -63,7 +77,7 @@ namespace Web.Infrastructure.Repositories
         /// <returns></returns>
         public async Task<T?> GetValue(Expression<Func<T, bool>> exp)
         {
-            return await _db.Set<T>().FirstOrDefaultAsync(exp);
+            return await ActiveSet().FirstOrDefaultAsync(exp);
         }
 
         /// <summary>
@@ -72,7 +86,7 @@ namespace Web.Infrastructure.Repositories
         /// <returns></returns>
         public IQueryable<T> GetValues()
         {
-            return _db.Set<T>().AsQueryable();
+            return ActiveSet();
         }
 
         /// <summary>
@@ -84,6 +98,11 @@ namespace Web.Infrastructure.Repositories
         {
             _db.Set<T>().UpdateRange(entities);
             return await _db.SaveChangesAsync();
+        }
+
+        private IQueryable<T> ActiveSet()
+        {
+            return _db.Set<T>().Where(p => p.DeleteId == 0);
         }
     }
 }

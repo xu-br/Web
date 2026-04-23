@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Web.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class a : Migration
+    public partial class RBAC : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -29,7 +29,7 @@ namespace Web.Infrastructure.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     CreateTime = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     UpdateTime = table.Column<DateTime>(type: "datetime(6)", nullable: false),
-                    DeleteId = table.Column<int>(type: "int", nullable: false)
+                    DeleteId = table.Column<long>(type: "bigint", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -48,7 +48,7 @@ namespace Web.Infrastructure.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     CreateTime = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     UpdateTime = table.Column<DateTime>(type: "datetime(6)", nullable: false),
-                    DeleteId = table.Column<int>(type: "int", nullable: false)
+                    DeleteId = table.Column<long>(type: "bigint", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -71,7 +71,7 @@ namespace Web.Infrastructure.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     CreateTime = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     UpdateTime = table.Column<DateTime>(type: "datetime(6)", nullable: false),
-                    DeleteId = table.Column<int>(type: "int", nullable: false)
+                    DeleteId = table.Column<long>(type: "bigint", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -88,7 +88,7 @@ namespace Web.Infrastructure.Migrations
                     PermissionId = table.Column<long>(type: "bigint", nullable: false),
                     CreateTime = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     UpdateTime = table.Column<DateTime>(type: "datetime(6)", nullable: false),
-                    DeleteId = table.Column<int>(type: "int", nullable: false)
+                    DeleteId = table.Column<long>(type: "bigint", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -117,7 +117,7 @@ namespace Web.Infrastructure.Migrations
                     RoleId = table.Column<long>(type: "bigint", nullable: false),
                     CreateTime = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     UpdateTime = table.Column<DateTime>(type: "datetime(6)", nullable: false),
-                    DeleteId = table.Column<int>(type: "int", nullable: false)
+                    DeleteId = table.Column<long>(type: "bigint", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -138,9 +138,9 @@ namespace Web.Infrastructure.Migrations
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Permissions_Name",
+                name: "IX_Permissions_Name_DeleteId",
                 table: "Permissions",
-                column: "Name",
+                columns: new[] { "Name", "DeleteId" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
@@ -149,15 +149,15 @@ namespace Web.Infrastructure.Migrations
                 column: "PermissionId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_RolePermissions_RoleId_PermissionId",
+                name: "IX_RolePermissions_RoleId_PermissionId_DeleteId",
                 table: "RolePermissions",
-                columns: new[] { "RoleId", "PermissionId" },
+                columns: new[] { "RoleId", "PermissionId", "DeleteId" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_Roles_Name",
+                name: "IX_Roles_Name_DeleteId",
                 table: "Roles",
-                column: "Name",
+                columns: new[] { "Name", "DeleteId" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
@@ -166,21 +166,21 @@ namespace Web.Infrastructure.Migrations
                 column: "RoleId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_UserRoles_UserId_RoleId",
+                name: "IX_UserRoles_UserId_RoleId_DeleteId",
                 table: "UserRoles",
-                columns: new[] { "UserId", "RoleId" },
+                columns: new[] { "UserId", "RoleId", "DeleteId" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_Users_Email",
+                name: "IX_Users_Email_DeleteId",
                 table: "Users",
-                column: "Email",
+                columns: new[] { "Email", "DeleteId" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_Users_Username",
+                name: "IX_Users_Username_DeleteId",
                 table: "Users",
-                column: "Username",
+                columns: new[] { "Username", "DeleteId" },
                 unique: true);
         }
 

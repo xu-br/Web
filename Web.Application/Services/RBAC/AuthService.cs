@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using MD5Hash;
+﻿using MD5Hash;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -99,26 +98,11 @@ namespace Web.Application.Services.RBAC
             if (user.PasswordHash != input.Password.GetMD5())
                 throw new Exception("用户名或密码错误");
 
-            // 查询用户权限
-            var roleIds = _userRoleRepo.GetValues()
-                .Where(ur => ur.UserId == user.Id)
-                .Select(ur => ur.RoleId)
-                .ToList();
-
-            var permissionIds = _rolePermissionRepo.GetValues()
-                .Where(rp => roleIds.Contains(rp.RoleId))
-                .Select(rp => rp.PermissionId)
-                .Distinct()
-                .ToList();
-
-            var permissions = _permissionRepo.GetValues()
-                .Where(p => permissionIds.Contains(p.Id))
-                .Select(p => p.Name)
-                .ToList();
+            var permissions = await GetPermissionNamesAsync(user.Id);
 
             // 生成双 Token
             var accessToken = GenerateAccessToken(user, permissions);
-            var refreshToken = GenerateRefreshToken();
+            var refreshToken = GenerateRefreshToken(user.Id);
 
             var accessExpires = DateTime.Now.AddHours(2);
             var refreshExpires = DateTime.Now.AddDays(7);
@@ -150,14 +134,9 @@ namespace Web.Application.Services.RBAC
             if (string.IsNullOrWhiteSpace(input.RefreshToken))
                 throw new Exception("RefreshToken不能为空");
 
-            // 从 Redis 里找这个 RefreshToken 属于哪个用户
-            // 这里用 scan 前缀匹配，所以 key 规则是 refresh:{userId}
-            // 前端需要同时传 userId，或者把 userId 编码进 RefreshToken
-            // 这里简化处理：RefreshToken 格式 = userId:randomStr
             var parts = input.RefreshToken.Split(':');
-            if (parts.Length != 2) throw new Exception("无效的 RefreshToken");
-
-            var userId = long.Parse(parts[0]);
+            if (parts.Length != 2 || !long.TryParse(parts[0], out var userId))
+                throw new Exception("无效的 RefreshToken");
             var key = $"refresh:{userId}";
 
             var stored = await _redis.GetAsync(key);
@@ -167,20 +146,11 @@ namespace Web.Application.Services.RBAC
             var user = await _userRepo.GetModel(userId);
             if (user == null) throw new Exception("用户不存在");
 
-            var roleIds = _userRoleRepo.GetValues()
-                .Where(ur => ur.UserId == user.Id)
-                .Select(ur => ur.RoleId)
-                .ToList();
-
-            var permissions = _rolePermissionRepo.GetValues()
-                .Where(rp => roleIds.Contains(rp.RoleId))
-                .Select(rp => rp.PermissionId.ToString())
-                .Distinct()
-                .ToList();
+            var permissions = await GetPermissionNamesAsync(user.Id);
 
             // 生成新的双 Token，旧的自动覆盖
             var accessToken = GenerateAccessToken(user, permissions);
-            var refreshToken = $"{userId}:{GenerateRefreshToken()}";
+            var refreshToken = GenerateRefreshToken(userId);
 
             var accessExpires = DateTime.Now.AddHours(2);
             var refreshExpires = DateTime.Now.AddDays(7);
@@ -233,11 +203,31 @@ namespace Web.Application.Services.RBAC
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
-        private string GenerateRefreshToken()
+        private async Task<List<string>> GetPermissionNamesAsync(long userId)
+        {
+            var roleIds = _userRoleRepo.GetValues()
+                .Where(ur => ur.UserId == userId)
+                .Select(ur => ur.RoleId)
+                .ToList();
+
+            var permissionIds = _rolePermissionRepo.GetValues()
+                .Where(rp => roleIds.Contains(rp.RoleId))
+                .Select(rp => rp.PermissionId)
+                .Distinct()
+                .ToList();
+
+            return await Task.FromResult(_permissionRepo.GetValues()
+                .Where(p => permissionIds.Contains(p.Id))
+                .Select(p => p.Name)
+                .ToList());
+        }
+
+        private string GenerateRefreshToken(long userId)
         {
             var bytes = RandomNumberGenerator.GetBytes(32);
-            return Convert.ToBase64String(bytes)
+            var randomPart = Convert.ToBase64String(bytes)
                 .Replace("+", "").Replace("/", "").Replace("=", "");
+            return $"{userId}:{randomPart}";
         }
 
         private long GenerateId()

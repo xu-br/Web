@@ -28,8 +28,9 @@ namespace Web.Domain.Entities
         /// </summary>
         public DateTime UpdateTime { get; set; } = DateTime.Now;
         /// <summary>
-        /// 软删除标识
+        /// 软删除标识。
+        /// 0 表示未删除；被软删除时写入当前记录自身的 Id。
         /// </summary>
-        public int DeleteId { get; set; } = 0;
+        public long DeleteId { get; set; } = 0;
     }
 }
