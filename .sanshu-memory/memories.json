@@ -17,6 +17,22 @@
       "category": "Rule",
       "created_at": "2026-04-23T07:23:21.014274900Z",
       "updated_at": "2026-04-23T07:23:21.014274900Z"
+    },
+    {
+      "id": "63644818-4a50-423f-9b7e-53f51f75799f",
+      "content": "ELK 日志系统集成完成（2026-04-23）：\n1. 已配置 docker-compose.elk.yml（Elasticsearch + Kibana + Logstash）\n2. 已集成 Serilog（控制台 + 文件 + Elasticsearch）\n3. 已添加业务日志（注册、登录、退出）\n4. 已生成完整使用文档（ELK日志系统集成指南.md）\n5. 日志索引格式：webapi-logs-{yyyy.MM.dd}\n6. Kibana 访问地址：http://localhost:5601\n7. Elasticsearch 访问地址：http://localhost:9200",
+      "content_normalized": "elk 日志系统集成完成2026-04-23 1 已配置 docker-composeelkymlelasticsearch + kibana + logstash 2 已集成 serilog控制台 + 文件 + elasticsearch 3 已添加业务日志注册登录退出 4 已生成完整使用文档elk日志系统集成指南md 5 日志索引格式webapi-logs-yyyymmdd 6 kibana 访问地址http//localhost5601 7 elasticsearch 访问地址http//localhost9200",
+      "category": "Rule",
+      "created_at": "2026-04-23T07:36:50.234706Z",
+      "updated_at": "2026-04-23T07:36:50.234706Z"
+    },
+    {
+      "id": "0b949ead-9afe-476e-8b94-0021fe34c42e",
+      "content": "用户决定：\n1. 安全漏洞暂不修复（AutoMapper 13.0.1、MD5 密码加密等）\n2. 准备安装 Docker Desktop 以使用 ELK Stack\n3. 已生成 Docker 安装指南文档",
+      "content_normalized": "用户决定 1 安全漏洞暂不修复automapper 1301md5 密码加密等 2 准备安装 docker desktop 以使用 elk stack 3 已生成 docker 安装指南文档",
+      "category": "Rule",
+      "created_at": "2026-04-23T07:38:31.270134700Z",
+      "updated_at": "2026-04-23T07:38:31.270134700Z"
     }
   ],
   "last_dedup_at": "2026-04-15T08:17:07.743250900Z",

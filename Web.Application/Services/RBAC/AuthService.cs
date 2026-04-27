@@ -1,5 +1,6 @@
 ﻿using MD5Hash;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -24,21 +25,24 @@ namespace Web.Application.Services.RBAC
         private readonly RedisService _redis;
         private readonly IConfiguration _config;
         private readonly IBaseRepository<Permission> _permissionRepo;
+        private readonly ILogger<AuthService> _logger;
 
         public AuthService(
             IBaseRepository<User> userRepo,
             IBaseRepository<UserRole> userRoleRepo,
             IBaseRepository<RolePermission> rolePermissionRepo,
-            IBaseRepository<Permission> permissionRepo,  // 新增
+            IBaseRepository<Permission> permissionRepo,
             RedisService redis,
-            IConfiguration config)
+            IConfiguration config,
+            ILogger<AuthService> logger)
         {
             _userRepo = userRepo;
             _userRoleRepo = userRoleRepo;
             _rolePermissionRepo = rolePermissionRepo;
-            _permissionRepo = permissionRepo;  // 新增
+            _permissionRepo = permissionRepo;
             _redis = redis;
             _config = config;
+            _logger = logger;
         }
 
         /// <summary>
@@ -46,6 +50,8 @@ namespace Web.Application.Services.RBAC
         /// </summary>
         public async Task<bool> RegisterAsync(RegisterInput input)
         {
+            _logger.LogInformation("用户注册请求: Username={Username}, Email={Email}", input.Username, input.Email);
+
             if (string.IsNullOrWhiteSpace(input.Username))
                 throw new Exception("用户名不能为空");
             if (input.Username.Length < 3 || input.Username.Length > 20)
@@ -65,7 +71,11 @@ namespace Web.Application.Services.RBAC
 
             // 检查用户名是否已存在
             var exists = await _userRepo.GetValue(u => u.Username == input.Username);
-            if (exists != null) throw new Exception("用户名已存在");
+            if (exists != null)
+            {
+                _logger.LogWarning("用户注册失败: 用户名已存在 Username={Username}", input.Username);
+                throw new Exception("用户名已存在");
+            }
 
             var user = new User
             {
@@ -78,7 +88,18 @@ namespace Web.Application.Services.RBAC
                 UpdateTime = DateTime.Now
             };
 
-            return await _userRepo.AddRange(user) > 0;
+            var result = await _userRepo.AddRange(user) > 0;
+
+            if (result)
+            {
+                _logger.LogInformation("用户注册成功: UserId={UserId}, Username={Username}", user.Id, user.Username);
+            }
+            else
+            {
+                _logger.LogError("用户注册失败: Username={Username}", input.Username);
+            }
+
+            return result;
         }
 
         /// <summary>
@@ -86,6 +107,8 @@ namespace Web.Application.Services.RBAC
         /// </summary>
         public async Task<LoginOutput> LoginAsync(LoginInput input)
         {
+            _logger.LogInformation("用户登录请求: Username={Username}", input.Username);
+
             if (string.IsNullOrWhiteSpace(input.Username))
                 throw new Exception("用户名不能为空");
             if (string.IsNullOrWhiteSpace(input.Password))
@@ -94,9 +117,17 @@ namespace Web.Application.Services.RBAC
                 throw new Exception("密码长度不能少于6位");
 
             var user = await _userRepo.GetValue(u => u.Username == input.Username);
-            if (user == null) throw new Exception("用户名或密码错误");
-            if (user.PasswordHash != input.Password.GetMD5())
+            if (user == null)
+            {
+                _logger.LogWarning("用户登录失败: 用户不存在 Username={Username}", input.Username);
                 throw new Exception("用户名或密码错误");
+            }
+
+            if (user.PasswordHash != input.Password.GetMD5())
+            {
+                _logger.LogWarning("用户登录失败: 密码错误 UserId={UserId}, Username={Username}", user.Id, user.Username);
+                throw new Exception("用户名或密码错误");
+            }
 
             var permissions = await GetPermissionNamesAsync(user.Id);
 
@@ -113,6 +144,9 @@ namespace Web.Application.Services.RBAC
                 refreshToken,
                 TimeSpan.FromDays(7)
             );
+
+            _logger.LogInformation("用户登录成功: UserId={UserId}, Username={Username}, PermissionCount={PermissionCount}",
+                user.Id, user.Username, permissions.Count);
 
             return new LoginOutput
             {
@@ -174,6 +208,7 @@ namespace Web.Application.Services.RBAC
         /// </summary>
         public async Task<bool> LogoutAsync(long userId)
         {
+            _logger.LogInformation("用户退出登录: UserId={UserId}", userId);
             return await _redis.DeleteAsync($"refresh:{userId}");
         }
 
